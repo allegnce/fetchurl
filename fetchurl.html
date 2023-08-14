@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playback URL Fetch</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    'sans': ['Inter'],
+                }
+            }
+        }
+    </script>
+</head>
+<body class="antialiased font-sans h-full bg-zinc-900">
+    <main class="flex flex-col min-h-screen">
+        <div class="max-w-3xl w-full mx-auto pt-32">
+            <div class="main-container flex flex-col items-center gap-6 mx-4">
+                <h1 class="text-4xl font-bold text-gray-100">Kick Playback URL Fetch</h1>
+                <button type="button" class="fetch-btn inline-flex items-center justify-center w-full py-5 px-6 shadow-sm text-2xl font-medium text-gray-100 bg-zinc-800 focus:ring-2 focus:outline-none focus:ring-blue-400 rounded-md transition ease-out duration-200">
+                    Fetch
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showResult(playbackUrl) {
+            let mainContainer = document.querySelector('.main-container');
+            let resultContainer = document.createElement('div');
+            resultContainer.classList.add('mt-8', 'text-gray-100', 'w-full', 'break-words', 'hyphens-auto');
+
+            resultContainer.appendChild(document.createTextNode(playbackUrl));
+            mainContainer.appendChild(resultContainer);
+        }
+
+        async function getPlaybackUrl() {
+            try {
+                let response = await fetch('https://kick.com/api/v2/channels/xqc');
+                let data = await response.json();
+
+                await navigator.clipboard.writeText(data.playback_url);
+                fetchBtn.innerText = 'Link copied';
+                showResult(data.playback_url);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        const fetchBtn = document.querySelector('.fetch-btn');
+        fetchBtn.addEventListener('click', getPlaybackUrl);
+    </script>
+</body>
+</html>
