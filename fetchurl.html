@@ -24,38 +24,78 @@
         <div class="max-w-3xl w-full mx-auto pt-32">
             <div class="main-container flex flex-col items-center gap-6 mx-4">
                 <h1 class="text-4xl font-bold text-gray-100">Kick Playback URL Fetch</h1>
-                <button type="button" class="fetch-btn inline-flex items-center justify-center w-full py-5 px-6 shadow-sm text-2xl font-medium text-gray-100 bg-zinc-800 focus:ring-2 focus:outline-none focus:ring-blue-400 rounded-md transition ease-out duration-200">
-                    Fetch
+                <button type="button" class="copy-btn inline-flex items-center justify-center w-full py-5 px-6 shadow-sm text-2xl font-medium text-gray-100 bg-zinc-800 focus:ring-2 focus:outline-none focus:ring-blue-400 rounded-md transition ease-out duration-200">
+                    Copy
                 </button>
             </div>
         </div>
     </main>
-
+    
     <script>
-        function showResult(playbackUrl) {
+        let data = {};
+
+        function showInfo(data) {
+            let mainContainer = document.querySelector('.main-container');
+            let cardContainer = document.createElement('div');
+            cardContainer.classList.add('flex', 'mt-8', 'text-gray-100', 'w-full');
+            let imgContainer = document.createElement('div');
+            imgContainer.classList.add('relative');
+            let profileImg = document.createElement('img');
+            profileImg.classList.add('w-24', 'h-24', 'rounded-full', 'shadow-lg');
+            profileImg.setAttribute('src', data.user.profile_pic);
+            
+            imgContainer.appendChild(profileImg);
+            cardContainer.appendChild(imgContainer)
+            mainContainer.appendChild(cardContainer);
+            
+            
+            let statusIndicator = document.createElement('div');
+            statusIndicator.classList.add('absolute', 'bottom-4', 'left-20', 'w-4', 'h-4', 'bg-gray-900', 'border-2', 'border-zinc-600', 'rounded-full');
+            if (!data.livestream) {
+                statusIndicator.classList.add('bg-zinc-950');
+                
+                imgContainer.appendChild(statusIndicator);
+                return;
+            }
+            statusIndicator.classList.add('bg-green-500');
+            imgContainer.appendChild(statusIndicator);
+        }
+        
+        function showResult() {
             let mainContainer = document.querySelector('.main-container');
             let resultContainer = document.createElement('div');
             resultContainer.classList.add('mt-8', 'text-gray-100', 'w-full', 'break-words', 'hyphens-auto');
 
-            resultContainer.appendChild(document.createTextNode(playbackUrl));
+            resultContainer.appendChild(document.createTextNode(data.playback_url));
             mainContainer.appendChild(resultContainer);
         }
 
-        async function getPlaybackUrl() {
+        async function copyLink() {
+            await navigator.clipboard.writeText(data.playback_url);
+            copyBtn.innerText = 'Link copied';
+            showResult();
+        }
+
+        async function getData() {
             try {
                 let response = await fetch('https://kick.com/api/v2/channels/xqc');
                 let data = await response.json();
-
-                await navigator.clipboard.writeText(data.playback_url);
-                fetchBtn.innerText = 'Link copied';
-                showResult(data.playback_url);
+                console.log(data);
+                
+                return data;
             } catch (err) {
                 console.error(err);
             }
         }
 
-        const fetchBtn = document.querySelector('.fetch-btn');
-        fetchBtn.addEventListener('click', getPlaybackUrl);
+        window.addEventListener('load', async function() {
+            data = await getData();
+            
+            showInfo(data);
+        });
+        
+        const copyBtn = document.querySelector('.copy-btn');
+        copyBtn.addEventListener('click', copyLink);
     </script>
 </body>
 </html>
