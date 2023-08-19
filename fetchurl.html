@@ -45,15 +45,9 @@
         </div>
     </main>
     <script>
-        // let data = [];
-        let channels = [
-            "xqc",
-            "trainwreckstv"
-        ];
-
-        function showSideInfo(channels) {
-
-            const orderedChannels = channels.sort((channelFirst, channelSecond) => {
+        
+        function sortChannels(channels) {
+            channels.sort((channelFirst, channelSecond) => {
                 if (!channelFirst.livestream && channelSecond.livestream) {
                     return 1;
                 }
@@ -62,8 +56,20 @@
                 }
                 return 0;
             });
+            channels.sort((channelFirst, channelSecond) => {
+                if (channelFirst.livestream?.viewer_count < channelSecond.livestream?.viewer_count) {
+                    return 1;
+                }
+                if (channelFirst.livestream?.viewer_count > channelSecond.livestream?.viewer_count) {
+                    return -1;
+                }
+                return 0;
+            });
+        }
 
-            for (const channel of orderedChannels) {
+        function showSideInfo(channels) {
+            
+            for (const channel of channels) {
                 let mainContainer = document.querySelector('#channels');
                 let cardContainer = document.createElement('div');
                 cardContainer.classList.add('flex', 'items-center', 'h-11', 'w-full', 'gap-3', 'text-gray-100', 'py-1.5', 'px-2');
@@ -98,6 +104,7 @@
                 statusIndicator.classList.add('bg-green-500');
                 imgContainer.appendChild(statusIndicator);
             }
+
         }
 
         function createCardLayout(channel) {
@@ -131,11 +138,12 @@
         }
 
         function showLiveInfo(channels) {
+
             let liveChannels = channels.filter(channel => channel.livestream);
 
             if (!liveChannels.length) {
                 document.querySelector('#directory-container').innerHTML = `
-                    <h2 class="text-lg font-semibold text-gray-100/50">No Results Found</h2>
+                    <h2 class="text-lg font-semibold text-zinc-400">No Results Found</h2>
                 `;
                 return;
             }
@@ -161,12 +169,11 @@
             setTimeout(() => {
                 element.innerText = 'Copy';
             }, 2000);
-            // showResult();
         }
 
-        async function getDataTest() {
+        async function getData(channelsList) {
             try {
-                let requests = channels.map(channel => fetch(`https://kick.com/api/v1/channels/${channel}`));
+                let requests = channelsList.map(channel => fetch(`https://kick.com/api/v1/channels/${channel}`));
                 let responses = await Promise.all(requests);
                 
                 let data = await Promise.all(responses.map(response => response.json()));
@@ -177,9 +184,17 @@
         }
 
         window.addEventListener('load', async function() {
-            let channelsData = await getDataTest();
+            let channelsList = [
+                "xqc",
+                "trainwreckstv",
+                "jessesmfi",
+                "buddha"
+            ];
+
+            let channelsData = await getData(channelsList);
             console.log(channelsData);
             
+            sortChannels(channelsData);
             showSideInfo(channelsData);
             showLiveInfo(channelsData);
         });
