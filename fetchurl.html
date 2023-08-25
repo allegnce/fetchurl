@@ -20,30 +20,42 @@
     </script>
 </head>
 <body class="antialiased font-sans h-full bg-zinc-900">
-    <main class="flex flex-col min-h-screen">
+    <div class="flex flex-col min-h-screen">
         <div class="container w-full mx-auto py-10 px-4 sm:py-16 sm:px-8">
-            <div class="relative flex flex-col bg-zinc-950 rounded-md sm:flex-row">
-                <aside class="w-56 shrink-0">
-                    <div class="py-5 px-4 h-full">
-                        <div class="flex flex-col" id="channels">
-                            <h2 class="text-base text-white font-bold px-2 mb-2">Channels</h2>
-    
+            <div class="relative flex flex-col grow bg-zinc-950 rounded-md overflow-hidden sm:flex-row">
+                <div class="relative">
+                    <aside class="w-60 py-5 px-4 h-full">
+                        <div class="flex flex-col">
+                            <div class="mb-2 px-2">
+                                <h2 class="text-base text-white font-bold">Channels</h2>
+                            </div>
+                            <div id="channels">
+
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+                <main class="main-container relative w-full grow">
+                    <div class="relative h-full py-5 px-4">
+                        <div class="flex flex-col">
+                            <div class="w-full">
+                                <h1 class="text-2xl sm:text-4xl font-bold text-gray-100">Fetch Playback URL</h1>
+                            </div>
+                            <div class="w-full mt-3">
+                                <h2 class="text-lg font-semibold text-gray-100">Live Channels</h2>
+                            </div>
+                    
+                            <div id="directory-container" class="py-5">
+                                <div id="livestreams" class="grid grid-cols-12 gap-3">
+
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </aside>
-                <div class="main-container w-full flex flex-col py-5 px-4">
-                    <div class="relative">
-                        <h1 class="text-2xl sm:text-4xl font-bold text-gray-100">Fetch Playback URL</h1>
-                        <h2 class="text-lg font-semibold text-gray-100 mt-3">Live Channels</h2>
-                    </div>
-                    <div id="directory-container" class="py-5">
-                        
-                    </div>
-    
-                </div>
+                </main>
             </div>
         </div>
-    </main>
+    </div>
     <script>
         
         function sortChannels(channels) {
@@ -67,22 +79,24 @@
             });
         }
 
-        function showSideInfo(channels) {
-            
+        function showSideData(channels) {
+
+            let mainContainer = document.querySelector('#channels');
+            mainContainer.innerHTML = '';
+
             for (const channel of channels) {
-                let mainContainer = document.querySelector('#channels');
                 let cardContainer = document.createElement('div');
-                cardContainer.classList.add('flex', 'items-center', 'h-11', 'w-full', 'gap-3', 'text-gray-100', 'py-1.5', 'px-2');
+                cardContainer.classList.add('flex', 'items-center', 'shrink-0', 'grow-0', 'h-11', 'w-full', 'gap-3', 'py-1.5', 'px-2', 'text-gray-100');
                 let imgContainer = document.createElement('div');
-                imgContainer.classList.add('relative', 'w-8', 'h-8', 'rounded-full', 'shrink-0');
+                imgContainer.classList.add('relative', 'w-8', 'h-8', 'rounded-full', 'shrink-0', 'grow-0');
                 let profileImg = document.createElement('img');
-                profileImg.classList.add('w-8', 'h-8', 'rounded-full', 'shadow-lg');
+                profileImg.classList.add('w-8', 'h-8', 'rounded-full', 'object-cover');
                 profileImg.setAttribute('src', channel.user.profile_pic);
 
                 let nameContainer = document.createElement('div');
-                nameContainer.classList.add('w-full', 'text-sm', 'font-bold', 'truncate');
+                nameContainer.classList.add('w-full', 'text-sm', 'font-bold', 'text-gray-100', 'leading-4', 'truncate');
                 let profileName = document.createElement('h2');
-                profileName.classList.add('truncate', 'leading-4')
+                profileName.classList.add('truncate')
                 profileName.innerText = channel.user.username;
 
                 imgContainer.appendChild(profileImg);
@@ -98,7 +112,7 @@
                     continue;
                 }
                 let currentCategory = document.createElement('p');
-                currentCategory.classList.add('truncate', 'leading-4', 'font-normal', 'text-zinc-400')
+                currentCategory.classList.add('truncate', 'font-normal', 'text-zinc-400');
                 currentCategory.innerText = channel.livestream.categories?.[0].name;
                 nameContainer.appendChild(currentCategory);
                 statusIndicator.classList.add('bg-green-500');
@@ -109,7 +123,7 @@
 
         function createCardLayout(channel) {
             let card = `
-                    <div class="w-full sm:w-72">
+                    <div class="col-span-full lg:col-span-6 xl:col-span-4 2xl:col-span-3">
                         <div class="flex flex-col rounded p-2">
                             <div class="thumbnail-container aspect-video relative w-full h-full rounded overflow-hidden">
                                 <img src="${channel.livestream.thumbnail.url}" alt="" class="object-cover w-full h-full">
@@ -119,7 +133,7 @@
                                 <div class="mr-2.5 shrink-0">
                                     <img src="${channel.user.profile_pic}" alt="" class="w-8 h-8 rounded-full">
                                 </div>
-                                <div class="flex-1 min-w-0">
+                                <div class="min-w-0 flex-1">
                                     <h3 title="${channel.livestream.session_title}"
                                         class="truncate text-base font-bold leading-5 text-white">${channel.livestream.session_title}</h3>
                                     <h2 class="truncate text-sm leading-5 text-white/60">${channel.user.username}</h2>
@@ -137,7 +151,7 @@
                 document.querySelector('#livestreams').insertAdjacentHTML('beforeend', card)
         }
 
-        function showLiveInfo(channels) {
+        function showMainData(channels) {
 
             let liveChannels = channels.filter(channel => channel.livestream);
 
@@ -147,9 +161,7 @@
                 `;
                 return;
             }
-            document.querySelector('#directory-container').innerHTML = `
-                <div class="flex flex-wrap min-w-full gap-3 relative" id="livestreams"></div>
-            `;
+            document.querySelector('#livestreams').innerHTML = '';
 
             for (const channel of liveChannels) {
                 createCardLayout(channel);
@@ -184,29 +196,36 @@
         }
 
         function skeletonLoading(totalCount) {
-            document.querySelector('#directory-container').innerHTML = `
-                <div class="flex flex-wrap min-w-full gap-3 relative" id="livestreams"></div>
-            `;
             for (let i = 0; i < totalCount; i++) {
-            let skeletonCard = `
-                    <div class="w-full sm:w-72 animate-pulse">
-                        <div class="flex flex-col rounded p-2">
-                            <div class="aspect-video relative w-full h-full rounded overflow-hidden bg-zinc-800"></div>
-                            <div class="channel-data-container flex pt-2">
-                                <div class="mr-2.5 shrink-0">
-                                    <div class="w-8 h-8 rounded-full bg-zinc-800"></div>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="h-4 w-3/4 rounded-sm bg-zinc-800 mt-0.5 mb-1.5"></div>
-                                    <div class="h-3.5 w-1/2 rounded-sm bg-zinc-800 mb-1.5"></div>
-                                    <div class="h-3.5 w-1/2 rounded-sm bg-zinc-800 mb-0.5"></div>
+                let skeletonSide = `
+                    <div class="flex items-center h-11 w-full gap-3 py-1.5 px-2 animate-pulse">
+                        <div class="h-8 w-8 rounded-full bg-zinc-800 shrink-0"></div>
+                        <div class="w-full">
+                            <div class="h-3 my-0.5 bg-zinc-800 rounded-sm w-1/2"></div>
+                            <div class="h-3 my-0.5 bg-zinc-800 rounded-sm w-3/4"></div>
+                        </div>
+                    </div>
+                `;
+                document.querySelector('#channels').insertAdjacentHTML('beforeend', skeletonSide);
+                let skeletonCard = `
+                        <div class="col-span-full lg:col-span-6 xl:col-span-4 2xl:col-span-3 animate-pulse">
+                            <div class="flex flex-col rounded p-2">
+                                <div class="aspect-video relative w-full h-full rounded overflow-hidden bg-zinc-800"></div>
+                                <div class="channel-data-container flex pt-2">
+                                    <div class="mr-2.5 shrink-0">
+                                        <div class="w-8 h-8 rounded-full bg-zinc-800"></div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="h-4 w-3/4 rounded-sm bg-zinc-800 mt-0.5 mb-1.5"></div>
+                                        <div class="h-3.5 w-1/2 rounded-sm bg-zinc-800 mb-1.5"></div>
+                                        <div class="h-3.5 w-1/2 rounded-sm bg-zinc-800 mb-0.5"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-            document.querySelector('#livestreams').insertAdjacentHTML('beforeend', skeletonCard)
+                `;
+                document.querySelector('#livestreams').insertAdjacentHTML('beforeend', skeletonCard);
             }
         }
 
@@ -217,15 +236,13 @@
                 "jessesmfi",
                 "buddha"
             ];
-
             skeletonLoading(4);
-            
             let channelsData = await getData(channelsList);
             console.log(channelsData);
             
             sortChannels(channelsData);
-            showSideInfo(channelsData);
-            showLiveInfo(channelsData);
+            showSideData(channelsData);
+            showMainData(channelsData);
         });
         
     </script>
