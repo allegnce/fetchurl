@@ -19,7 +19,7 @@
         }
     </script>
 </head>
-<body class="antialiased font-sans h-full bg-zinc-900">
+<body class="antialiased font-sans text-gray-100 h-full bg-zinc-900">
     <div class="flex flex-col min-h-screen">
         <div class="container w-full mx-auto py-10 px-4 sm:py-16 sm:px-8">
             <div class="relative flex flex-col grow bg-zinc-950 rounded-md overflow-hidden sm:flex-row">
@@ -29,9 +29,7 @@
                             <div class="mb-2 px-2">
                                 <h2 class="text-base text-white font-bold">Channels</h2>
                             </div>
-                            <div id="sidebar-items">
-
-                            </div>
+                            <div id="sidebar-items"></div>
                         </div>
                     </aside>
                 </div>
@@ -45,31 +43,32 @@
                                 <h2 class="text-lg font-semibold text-gray-100">Live Channels</h2>
                             </div>
                             
-                            <div class="flex items-center mt-3">
-                                <div class="max-w-xs grow">
-                                    <form id="search-form">   
-                                        <label for="channel-search" class="mb-2 text-sm font-medium text-gray-100 sr-only">Search</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-100">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                                </svg>
+                            <div class="relative mt-3">
+                                <div id="search-container" class="flex items-center">
+                                    <div class="max-w-xs grow">
+                                        <form id="search-form">   
+                                            <label for="channel-search" class="mb-2 text-sm font-medium text-gray-100 sr-only">Search</label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-100">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                                    </svg>
+                                                </div>
+                                                <input id="channel-search" name="channel-search" type="search" class="block w-full p-2 pl-10 text-sm text-gray-100 rounded bg-zinc-900 border-0 transition placeholder:text-zinc-500 focus:ring-blue-400 focus:ring-2" placeholder="Search" required>
                                             </div>
-                                            <input id="channel-search" name="channel-search" type="search" class="block w-full p-2 pl-10 text-sm text-gray-100 rounded bg-zinc-900 border-0 focus:ring-blue-400 focus:ring-2" placeholder="Search" required>
-                                        </div>
-                                    </form>
+                                        </form>
+                                    </div>
+
+                                    <button id="reset-search-results" class="rounded p-2 ml-2 bg-zinc-900 text-gray-100 hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                        </svg>
+                                    </button>
                                 </div>
-                                <button id="reset" class="rounded p-2 ml-2 bg-zinc-900 text-gray-100">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                                    </svg>
-                                </button>
                             </div>
                     
                             <div id="directory-container" class="py-5">
-                                <div id="livestreams" class="grid grid-cols-12 gap-3">
-
-                                </div>
+                                <div id="livestreams" class="grid grid-cols-12 gap-3"></div>
                             </div>
                         </div>
 
@@ -100,27 +99,53 @@
                 return 0;
             });
         }
-
-        function clearSidebar() {
+        
+        function clearSidebarChannels() {
             document.querySelector('#sidebar-items').innerHTML = ''; 
         }
-
-        function clearMain() {
+        
+        function clearGridLivestreams() {
             document.querySelector('#livestreams').innerHTML = '';
         }
+        
+        function createChannelAvatar(channel) {
+            let channelAvatar;
+            if (!channel.user.profile_pic) {
+                channelAvatar = `
+                    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        </svg>
+                    </div>
+                `;
+            } else {
+                channelAvatar = `
+                    <img src="${channel.user.profile_pic}" alt="" class="w-8 h-8 rounded-full object-cover">
+                `;
+            }
+            return channelAvatar;
+        }
 
+        function formatViewerCount(number) {
+            const formattedNumber = Intl.NumberFormat('en', {
+                notation: "compact",
+                maximumFractionDigits: 1
+            });
+            return formattedNumber.format(number);
+        }
+        
         function showSideData(channels) {
             let mainContainer = document.querySelector('#sidebar-items');
-            clearSidebar();
+            clearSidebarChannels();
 
             for (const channel of channels) {
                 let cardContainer = document.createElement('div');
                 cardContainer.classList.add('flex', 'items-center', 'shrink-0', 'grow-0', 'h-11', 'w-full', 'gap-3', 'py-1.5', 'px-2', 'text-gray-100');
+                
                 let imgContainer = document.createElement('div');
                 imgContainer.classList.add('relative', 'w-8', 'h-8', 'rounded-full', 'shrink-0', 'grow-0');
-                let profileImg = document.createElement('img');
-                profileImg.classList.add('w-8', 'h-8', 'rounded-full', 'object-cover');
-                profileImg.setAttribute('src', channel.user.profile_pic);
+
+                let channelAvatar = createChannelAvatar(channel);
 
                 let nameContainer = document.createElement('div');
                 nameContainer.classList.add('w-full', 'text-sm', 'font-bold', 'text-gray-100', 'leading-4', 'truncate');
@@ -128,15 +153,15 @@
                 profileName.classList.add('truncate')
                 profileName.innerText = channel.user.username;
 
-                imgContainer.appendChild(profileImg);
+                imgContainer.insertAdjacentHTML('beforeend', channelAvatar);
                 nameContainer.appendChild(profileName);
                 cardContainer.append(imgContainer, nameContainer);
                 mainContainer.appendChild(cardContainer);
                 
                 let statusIndicator = document.createElement('div');
-                statusIndicator.classList.add('absolute', 'bottom-0', 'left-[1.375rem]', 'w-2.5', 'h-2.5', 'bg-gray-900', 'border-2', 'border-zinc-700', 'rounded-full');
+                statusIndicator.classList.add('absolute', 'bottom-[-3px]', 'right-[-3px]', 'w-3.5', 'h-3.5', 'border-[3px]', 'border-zinc-950', 'rounded-full');
                 if (!channel.livestream) {
-                    statusIndicator.classList.add('bg-zinc-950');
+                    statusIndicator.classList.add('bg-zinc-700');
                     imgContainer.appendChild(statusIndicator);
                     continue;
                 }
@@ -147,49 +172,65 @@
                 statusIndicator.classList.add('bg-green-500');
                 imgContainer.appendChild(statusIndicator);
             }
+
         }
 
         function createCardLayout(channel) {
+
+            let channelAvatar = createChannelAvatar(channel);
+
             let card = `
-                    <div class="col-span-full lg:col-span-6 xl:col-span-4 2xl:col-span-3">
-                        <div class="flex flex-col rounded p-2">
-                            <div class="thumbnail-container aspect-video relative w-full h-full rounded overflow-hidden">
-                                <img src="${channel.livestream.thumbnail.url}" alt="" class="object-cover w-full h-full">
-                                <div class="absolute bottom-2 left-2 z-10 px-1 rounded-sm bg-black/60 text-gray-50 text-sm">${channel.livestream.viewer_count} viewers</div>
+                <div class="col-span-full lg:col-span-6 xl:col-span-4 2xl:col-span-3">
+                    <div class="flex flex-col rounded p-2">
+                        <div class="thumbnail-container aspect-video relative w-full h-full rounded overflow-hidden">
+                            <img src="${channel.livestream.thumbnail.url}" alt="" class="object-cover w-full h-full">
+                            <div class="absolute top-2 left-2 z-10 px-1 rounded-sm bg-red-600 text-white text-xs font-semibold pointer-events-none">
+                                <div>LIVE</div>
                             </div>
-                            <div class="channel-data-container flex pt-2">
-                                <div class="mr-2.5 shrink-0">
-                                    <img src="${channel.user.profile_pic}" alt="" class="w-8 h-8 rounded-full">
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <h3 title="${channel.livestream.session_title}"
-                                        class="truncate text-base font-bold leading-5 text-white">${channel.livestream.session_title}</h3>
-                                    <h2 class="truncate text-sm leading-5 text-white/60">${channel.user.username}</h2>
-                                    <h2 class="truncate text-sm leading-5 text-white/60">${channel.livestream.categories?.[0].name}</h2>
-                                </div>
+                            <div class="absolute bottom-2 left-2 z-10 px-1 rounded-sm bg-black/60 text-white text-sm">
+                                <div>${formatViewerCount(channel.livestream.viewer_count)} viewers</div>
                             </div>
                         </div>
-                        <div class="mt-3 p-2">
-                            <button type="button" data-slug="${channel.slug}" class="copy-btn inline-flex items-center justify-center w-full py-3 px-6 shadow-sm text-lg font-medium text-gray-100 bg-zinc-900 focus:ring-2 focus:outline-none focus:ring-blue-400 rounded transition ease-out duration-200">
-                                Copy
-                            </button>
+                        <div class="channel-data-container flex pt-2">
+                            <div class="mr-2.5 shrink-0">
+                                ${channelAvatar}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h3 title="${channel.livestream.session_title}"
+                                    class="truncate text-base font-bold leading-5 text-white">${channel.livestream.session_title}</h3>
+                                <h2 class="truncate text-sm leading-5 text-white/60">${channel.user.username}</h2>
+                                <h2 class="truncate text-sm leading-5 text-white/60">${channel.livestream.categories?.[0].name}</h2>
+                            </div>
                         </div>
                     </div>
-                `;
-                document.querySelector('#livestreams').insertAdjacentHTML('beforeend', card)
+                    <div class="mt-3 p-2">
+                        <button type="button" data-slug="${channel.slug}" class="copy-btn inline-flex items-center justify-center w-full py-3 px-6 text-lg font-medium text-gray-100 bg-zinc-900 focus:ring-2 focus:outline-none focus:ring-blue-400 rounded transition ease-out duration-200">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.querySelector('#livestreams').insertAdjacentHTML('beforeend', card)
         }
 
         function showMainData(channels) {
 
+            const livestreamsContainer = document.querySelector('#livestreams');
             let liveChannels = channels.filter(channel => channel.livestream);
 
+            clearGridLivestreams();
+
             if (!liveChannels.length) {
-                document.querySelector('#livestreams').innerHTML = `
-                    <h2 class="text-lg font-semibold text-zinc-400">No Results Found</h2>
-                `;
+                const noResults = document.createElement('h2');
+                noResults.className = 'col-span-full text-lg font-semibold text-zinc-400';
+                livestreamsContainer.appendChild(noResults);
+                if (!channels.length) {
+                    noResults.innerText = 'No Results Found';
+                    return;
+                }
+                noResults.innerText = 'No Live Channels Found';
                 return;
             }
-            clearMain();
 
             for (const channel of liveChannels) {
                 createCardLayout(channel);
@@ -215,6 +256,11 @@
             try {
                 let requests = channelsList.map(channel => fetch(`https://kick.com/api/v1/channels/${channel}`));
                 let responses = await Promise.all(requests);
+
+                const errorResponses = responses.filter((response) => response.status !== 200);
+                if (errorResponses.length > 0) {
+                    return [];
+                }
                 
                 let data = await Promise.all(responses.map(response => response.json()));
                 return data;
@@ -236,18 +282,17 @@
                 `;
                 document.querySelector('#sidebar-items').insertAdjacentHTML('beforeend', skeletonSide);
                 let skeletonCard = `
-                        <div class="col-span-full lg:col-span-6 xl:col-span-4 2xl:col-span-3 animate-pulse">
-                            <div class="flex flex-col rounded p-2">
-                                <div class="aspect-video relative w-full h-full rounded overflow-hidden bg-zinc-800"></div>
-                                <div class="channel-data-container flex pt-2">
-                                    <div class="mr-2.5 shrink-0">
-                                        <div class="w-8 h-8 rounded-full bg-zinc-800"></div>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="h-4 w-3/4 rounded-sm bg-zinc-800 mt-0.5 mb-1.5"></div>
-                                        <div class="h-3.5 w-1/2 rounded-sm bg-zinc-800 mb-1.5"></div>
-                                        <div class="h-3.5 w-1/2 rounded-sm bg-zinc-800 mb-0.5"></div>
-                                    </div>
+                    <div class="col-span-full lg:col-span-6 xl:col-span-4 2xl:col-span-3 animate-pulse">
+                        <div class="flex flex-col rounded p-2">
+                            <div class="aspect-video relative w-full h-full rounded overflow-hidden bg-zinc-800"></div>
+                            <div class="channel-data-container flex pt-2">
+                                <div class="mr-2.5 shrink-0">
+                                    <div class="w-8 h-8 rounded-full bg-zinc-800"></div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="h-4 w-3/4 rounded-sm bg-zinc-800 mt-0.5 mb-1.5"></div>
+                                    <div class="h-3.5 w-1/2 rounded-sm bg-zinc-800 mb-1.5"></div>
+                                    <div class="h-3.5 w-1/2 rounded-sm bg-zinc-800 mb-0.5"></div>
                                 </div>
                             </div>
                         </div>
@@ -262,26 +307,14 @@
                 "xqc",
                 "trainwreckstv",
                 "jessesmfi",
-                "buddha",
-                "adinross",
-                "ThonggDelonge",
-                "dafran",
-                "fousey",
-                "GMHikaru",
-                "Eddie",
-                "sapnap",
-                "AnimeVibes"
+                "buddha"
             ];
             return channelsList;
         }
-
-        window.addEventListener('load', () => {
-            init(getChannelsList());
-        });
-
+        
         async function init(channelsList) {
-            clearSidebar();
-            clearMain();
+            clearSidebarChannels();
+            clearGridLivestreams();
             channelsList.length === 1 ? skeletonLoading(1) : skeletonLoading(4);
 
             const channelsData = await getData(channelsList);
@@ -292,16 +325,23 @@
             showMainData(channelsData);
         }
 
+        window.addEventListener('load', () => {
+            init(getChannelsList());
+        });
+
         document.querySelector('#search-form').addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            let formChannel = new FormData(this).get('channel-search');
-            await init([formChannel]);
+            let formSubmittedData = new FormData(this).get('channel-search');
+            init([formSubmittedData]);
+
+            document.querySelector('#reset-search-results').classList.remove('hidden');
         });
 
-        document.querySelector('#reset').addEventListener('click', () => {
-            document.querySelector("#search-form").reset();
-            init(getChannelsList());
+        document.querySelector('#reset-search-results').addEventListener('click', () => {
+                document.querySelector("#search-form").reset();
+                document.querySelector('#reset-search-results').classList.add('hidden');
+                init(getChannelsList());
         });
         
     </script>
