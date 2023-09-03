@@ -42,7 +42,6 @@
                             <div class="w-full mt-3">
                                 <h2 class="text-lg font-semibold text-gray-100">Live Channels</h2>
                             </div>
-                            
                             <div class="relative mt-3">
                                 <div id="search-container" class="flex items-center">
                                     <div class="max-w-xs grow">
@@ -66,12 +65,10 @@
                                     </button>
                                 </div>
                             </div>
-                    
                             <div id="directory-container" class="py-5">
                                 <div id="livestreams" class="grid grid-cols-12 gap-3"></div>
                             </div>
                         </div>
-
                     </div>
                 </main>
             </div>
@@ -172,12 +169,39 @@
                 statusIndicator.classList.add('bg-green-500');
                 imgContainer.appendChild(statusIndicator);
             }
+        }
 
+        function formatTime(uptimeSeconds) {
+            let convertedHours = Math.floor(uptimeSeconds/3600);
+            uptimeSeconds = uptimeSeconds - (convertedHours * 3600);
+
+            let convertedMinutes = Math.floor(uptimeSeconds/60);
+            uptimeSeconds = uptimeSeconds - (convertedMinutes * 60);
+
+            let convertedSeconds = Math.floor(uptimeSeconds);
+
+            let formattedTime = convertedHours + ':' + (convertedMinutes < 10 ? '0' : '') + convertedMinutes + ':' + (convertedSeconds < 10 ? '0' : '')  + convertedSeconds;
+
+            return formattedTime;
+        }
+
+        function getStreamUptime(dateStarted) {
+            const startDate = new Date(dateStarted);
+            const utcStartDate = new Date(Date.UTC(startDate.getFullYear(),startDate.getMonth(),startDate.getDate(),startDate.getHours(),startDate.getMinutes(),startDate.getSeconds()));
+            
+            let currentDate = new Date();
+
+            let uptimeSeconds = (currentDate - utcStartDate) / 1000;
+            return formatTime(uptimeSeconds);
         }
 
         function createCardLayout(channel) {
 
             let channelAvatar = createChannelAvatar(channel);
+            let streamUptime = getStreamUptime(channel.livestream.start_time);
+            setInterval(() => {
+                document.querySelector(`[data-channel="${channel.slug}"]`).innerText = getStreamUptime(channel.livestream.start_time);
+            }, 1000);
 
             let card = `
                 <div class="col-span-full lg:col-span-6 xl:col-span-4 2xl:col-span-3">
@@ -189,6 +213,11 @@
                             </div>
                             <div class="absolute bottom-2 left-2 z-10 px-1 rounded-sm bg-black/60 text-white text-sm">
                                 <div>${formatViewerCount(channel.livestream.viewer_count)} viewers</div>
+                            </div>
+                            <div class="absolute bottom-2 right-2 z-10 px-1 rounded-sm bg-black/60 text-white text-xs">
+                                <div class="flex items-center justify-center w-[3.125rem]">
+                                    <div data-channel="${channel.slug}">${streamUptime}</div>
+                                </div>
                             </div>
                         </div>
                         <div class="channel-data-container flex pt-2">
@@ -311,7 +340,7 @@
             ];
             return channelsList;
         }
-        
+
         async function init(channelsList) {
             clearSidebarChannels();
             clearGridLivestreams();
@@ -343,7 +372,7 @@
                 document.querySelector('#reset-search-results').classList.add('hidden');
                 init(getChannelsList());
         });
-        
+
     </script>
 </body>
 </html>
